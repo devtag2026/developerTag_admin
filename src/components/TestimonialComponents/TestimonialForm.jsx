@@ -82,7 +82,7 @@ const TestimonialFormPage = () => {
                 await createTestimonial(submitData);
             }
 
-            router.replace('/admin/testimonials');
+            router.replace('/admin/testimonial');
         } catch (error) {
             console.error('Form submission failed:', error);
         }
