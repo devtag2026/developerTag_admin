@@ -202,14 +202,14 @@ const TestimonialFormPage = () => {
                 <div className="flex gap-4 pt-6">
                     <button
                         type="button"
-                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-lg font-medium transition-colors text-gray-900"
+                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-lg font-medium transition-colors "
                         onClick={handleCancel}
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
-                        className="flex-1 bg-[#00bba7] hover:bg-[#009689] text-white py-3 rounded-lg font-medium transition-colors disabled:opacity-50 text-gray-900        "
+                        className="flex-1 bg-[#00bba7] hover:bg-[#009689]  py-3 rounded-lg font-medium transition-colors disabled:opacity-50 text-gray-900        "
                         disabled={isSubmitting}
                     >
                         {isSubmitting ? 'Saving...' : (isEditing ? 'Update Testimonial' : 'Create Testimonial')}
