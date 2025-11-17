@@ -70,9 +70,13 @@ export const TestimonialProvider = ({ children }) => {
         try {
             const { page = 1, limit = 10, search = state.searchQuery } = params;
             const res = await listTestimonials({ page, limit, search });
-            dispatch({ type: 'SET_LIST', payload: { items: res.data?.items || res.items || [], pagination: res.data?.pagination || res.pagination || null } });
+            // Handle ApiResponse structure: { statusCode, data: { items, pagination }, message, success }
+            const items = res.data?.items || res.items || [];
+            const pagination = res.data?.pagination || res.pagination || null;
+            dispatch({ type: 'SET_LIST', payload: { items, pagination } });
         } catch (error) {
-            dispatch({ type: 'SET_ERROR', payload: error.message || 'Failed to fetch testimonials' });
+            const errorMessage = error.message || error.data?.message || 'Failed to fetch testimonials';
+            dispatch({ type: 'SET_ERROR', payload: errorMessage });
         }
     };
 

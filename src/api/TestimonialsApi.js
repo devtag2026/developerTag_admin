@@ -8,7 +8,7 @@ export const listTestimonials = async (params = {}) => {
             limit: String(limit),
             ...(search && { search })
         });
-        const response = await API.get(`/testimonials?${query}`);
+        const response = await API.get(`/testimonials/all-testimonial?${query}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || error;
@@ -17,12 +17,7 @@ export const listTestimonials = async (params = {}) => {
 
 export const createTestimonial = async (data) => {
     try {
-        const form = new FormData();
-        form.append('content', data.content);
-        form.append('name', data.name);
-        form.append('title', data.title);
-        if (data.testimonialImg) form.append('testimonialImg', data.testimonialImg);
-        const response = await API.post('/testimonials', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+        const response = await API.post('/testimonials', data);
         return response.data;
     } catch (error) {
         throw error.response?.data || error;
@@ -31,12 +26,7 @@ export const createTestimonial = async (data) => {
 
 export const updateTestimonial = async (id, data) => {
     try {
-        const form = new FormData();
-        if (data.content) form.append('content', data.content);
-        if (data.name) form.append('name', data.name);
-        if (data.title) form.append('title', data.title);
-        if (data.testimonialImg) form.append('testimonialImg', data.testimonialImg);
-        const response = await API.patch(`/testimonials/${id}`, form, { headers: { 'Content-Type': 'multipart/form-data' } });
+        const response = await API.patch(`/testimonials/${id}`, data);
         return response.data;
     } catch (error) {
         throw error.response?.data || error;
@@ -54,7 +44,7 @@ export const deleteTestimonial = async (id) => {
 
 export const getTestimonialById = async (id) => {
     try {
-        const response = await API.patch(`/testimonials/${id}`);
+        const response = await API.get(`/testimonials/${id}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || error;

@@ -18,21 +18,18 @@ export const listPortfolios = async (params = {}) => {
 export const createPortfolio = async (data) => {
     try {
         const form = new FormData();
-        form.append('slug', data.slug);
-        form.append('title', data.title);
-        form.append('tagLine', data.tagLine);
-        form.append('projectScopeDescription', data.projectScopeDescription);
+        form.append('name', data.name);
+        form.append('description', data.description);
+        form.append('cost', data.cost);
+        form.append('url', data.url);
+        form.append('category', data.category);
+        form.append('featured', String(data.featured || false));
+        form.append('displayOrder', String(data.displayOrder || 0));
 
-        if (Array.isArray(data.techStack)) {
-            form.append('techStack', JSON.stringify(data.techStack));
-        } else if (typeof data.techStack === 'string') {
-            form.append('techStack', data.techStack);
+        // Handle image - only file uploads
+        if (data.image && data.image instanceof File) {
+            form.append('image', data.image);
         }
-
-        if (data.previewImage) form.append('previewImage', data.previewImage);
-        if (data.websiteDemo) form.append('websiteDemo', data.websiteDemo);
-        if (data.mobileDemo) form.append('mobileDemo', data.mobileDemo);
-        if (data.adminPanelImage) form.append('adminPanelImage', data.adminPanelImage);
 
         const response = await API.post('/portfolio', form, { headers: { 'Content-Type': 'multipart/form-data' } });
         return response.data;
@@ -44,25 +41,29 @@ export const createPortfolio = async (data) => {
 export const updatePortfolio = async (id, data) => {
     try {
         const form = new FormData();
-        if (data.slug) form.append('slug', data.slug);
-        if (data.title) form.append('title', data.title);
-        if (data.tagLine) form.append('tagLine', data.tagLine);
-        if (data.projectScopeDescription) form.append('projectScopeDescription', data.projectScopeDescription);
+        if (data.name) form.append('name', data.name);
+        if (data.description) form.append('description', data.description);
+        if (data.cost) form.append('cost', data.cost);
+        if (data.url) form.append('url', data.url);
+        if (data.category) form.append('category', data.category);
+        if (data.featured !== undefined) form.append('featured', String(data.featured));
+        if (data.displayOrder !== undefined) form.append('displayOrder', String(data.displayOrder));
 
-        if (data.techStack) {
-            if (Array.isArray(data.techStack)) {
-                form.append('techStack', JSON.stringify(data.techStack));
-            } else if (typeof data.techStack === 'string') {
-                form.append('techStack', data.techStack);
-            }
+        // Handle image - only file uploads
+        if (data.image && data.image instanceof File) {
+            form.append('image', data.image);
         }
 
-        if (data.previewImage) form.append('previewImage', data.previewImage);
-        if (data.websiteDemo) form.append('websiteDemo', data.websiteDemo);
-        if (data.mobileDemo) form.append('mobileDemo', data.mobileDemo);
-        if (data.adminPanelImage) form.append('adminPanelImage', data.adminPanelImage);
-
         const response = await API.patch(`/portfolio/${id}`, form, { headers: { 'Content-Type': 'multipart/form-data' } });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error;
+    }
+};
+
+export const getPortfolioById = async (id) => {
+    try {
+        const response = await API.get(`/portfolio/${id}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || error;

@@ -89,8 +89,8 @@ export const ServiceProvider = ({ children }) => {
     const createServiceHandler = async (serviceData) => {
         dispatch({ type: 'SET_LOADING', payload: true });
         try {
-            if (!serviceData.image) {
-                throw new Error('Image is required');
+            if (!serviceData.heroImage && !serviceData.heroImageUrl) {
+                throw new Error('Hero image is required');
             }
             const response = await createService(serviceData);
             dispatch({ type: 'ADD_SERVICE', payload: response.data });

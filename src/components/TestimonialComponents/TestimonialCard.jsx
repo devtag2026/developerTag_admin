@@ -33,23 +33,13 @@ const TestimonialCard = ({ testimonial }) => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto p-6 bg-white">
-            <div className="h-48 bg-gray-100 flex items-center justify-center">
-                {testimonial.testimonialImg ? (
-                    <img
-                        src={testimonial.testimonialImg}
-                        alt={testimonial.name}
-                        className="w-full h-full object-cover"
-                    />
-                ) : (
-                    <div className="text-gray-500">No Image</div>
-                )}
-            </div>
-
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
             <div className="p-5">
                 <div className="mb-3">
-                    <h3 className="text-lg font-semibold text-gray-800 line-clamp-1">{testimonial.name}</h3>
-                    <p className="text-sm text-[#00bba7] font-medium">{testimonial.title}</p>
+                    <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">{testimonial.name}</h3>
+                    {testimonial.category && (
+                        <p className="text-sm text-gray-600 font-medium mt-1">{testimonial.category}</p>
+                    )}
                 </div>
 
                 <p className="text-gray-600 text-sm leading-relaxed mb-5 line-clamp-4">
@@ -58,13 +48,13 @@ const TestimonialCard = ({ testimonial }) => {
 
                 <div className="flex gap-3">
                     <button
-                        className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm transition-colors text-gray-900"
+                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition-colors"
                         onClick={handleEdit}
                     >
                         Edit
                     </button>
                     <button
-                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm transition-colors disabled:opacity-50"
+                        className="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition-colors disabled:opacity-50"
                         onClick={confirmDelete}
                         disabled={isDeleting}
                     >

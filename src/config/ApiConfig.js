@@ -2,11 +2,7 @@ import axios from "axios";
 
 // Create an Axios instance
 const API = axios.create({
-    baseURL: "http://localhost:8000/api/v1/",
-    withCredentials: true,
-    headers: {
-        "Content-Type": "application/json",
-    },
+    baseURL: "https://developer-tag-backend-wz59.vercel.app/api/v1", // Adjust the base URL if necessary
 });
 
 API.interceptors.request.use(

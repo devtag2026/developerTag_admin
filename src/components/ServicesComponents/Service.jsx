@@ -56,20 +56,20 @@ const ServiceDashboard = () => {
             </div>
 
             {/* Search Bar */}
-            <div className="mb-6">
-                <form onSubmit={handleSearch} className="flex gap-4 items-center">
-                    <div className="flex-1 max-w-md">
+            <div className="mb-6 space-y-4">
+                <form onSubmit={handleSearch} className="flex gap-4 items-center flex-wrap">
+                    <div className="flex-1 min-w-[300px]">
                         <input
                             type="text"
-                            placeholder="Search services..."
+                            placeholder="Search by title or description..."
                             value={searchInput}
                             onChange={(e) => setSearchInput(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00bba7] focus:border-transparent transition-colors text-gray-900 placeholder:text-gray-500 bg-white"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#00bba7] transition-colors text-gray-900"
                         />
                     </div>
                     <button
                         type="submit"
-                        className="px-6 py-2 rounded-lg bg-[#00bba7] hover:bg-[#009689] text-white transition-colors"
+                        className="bg-[#00bba7] hover:bg-[#009689] text-white px-6 py-2 rounded-lg transition-colors"
                     >
                         Search
                     </button>
@@ -77,16 +77,19 @@ const ServiceDashboard = () => {
                         <button
                             type="button"
                             onClick={clearSearch}
-                            className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+                            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
                         >
-                            Clear
+                            Clear Search
                         </button>
                     )}
                 </form>
+
+                {/* Active filters display */}
                 {state.searchQuery && (
-                    <p className="text-sm text-gray-600 mt-2">
-                        Showing results for: <span className="font-medium">"{state.searchQuery}"</span>
-                    </p>
+                    <div className="text-sm text-gray-600">
+                        Active filters:
+                        {state.searchQuery && <span className="ml-2 font-medium">Search: "{state.searchQuery}"</span>}
+                    </div>
                 )}
             </div>
 
@@ -97,9 +100,11 @@ const ServiceDashboard = () => {
             )}
 
             {/* Results Summary */}
-            {state.pagination && (
-                <div className="mb-4 text-sm text-gray-600">
-                    Showing {state.services.length} of {state.pagination.total} services
+            {state.pagination && !state.isLoading && (
+                <div className="mb-4 flex items-center justify-between flex-wrap gap-4">
+                    <div className="text-sm text-gray-600">
+                        Showing <span className="font-semibold text-gray-900">{state.services.length}</span> of <span className="font-semibold text-gray-900">{state.pagination.total}</span> services
+                    </div>
                 </div>
             )}
 
@@ -138,7 +143,7 @@ const ServiceDashboard = () => {
                     <button
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={!state.pagination.hasPrevPage}
-                        className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-900 text-gray-900"
+                        className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-900"
                     >
                         Previous
                     </button>
@@ -161,7 +166,7 @@ const ServiceDashboard = () => {
                     <button
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={!state.pagination.hasNextPage}
-                        className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-900 text-gray-900"
+                        className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-900"
                     >
                         Next
                     </button>

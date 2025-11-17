@@ -19,6 +19,9 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "Developer Tag - Admin Panel",
   description: "Developer Tag admin panel for managing site content",
+  icons: {
+    icon: "/icon.png",
+  },
 };
 
 export default function RootLayout({ children }) {

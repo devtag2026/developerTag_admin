@@ -11,6 +11,7 @@ const SubmittedForms = () => {
     const [searchInput, setSearchInput] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [typeFilter, setTypeFilter] = useState('');
+    const [expandedDescriptions, setExpandedDescriptions] = useState(new Set());
 
     // Fetch form submissions
     const fetchSubmissions = async (params = {}) => {
@@ -86,11 +87,37 @@ const SubmittedForms = () => {
         });
     };
 
+    // Toggle description expansion
+    const toggleDescription = (id) => {
+        setExpandedDescriptions(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(id)) {
+                newSet.delete(id);
+            } else {
+                newSet.add(id);
+            }
+            return newSet;
+        });
+    };
+
     // Get unique form types for filter dropdown
     const getUniqueFormTypes = () => {
         const types = [...new Set(submissions.map(sub => sub.formType).filter(Boolean))];
-        return types;
+        return types.sort();
     };
+
+    // Get unique service types
+    const getUniqueServiceTypes = () => {
+        const types = [...new Set(submissions.map(sub => sub.serviceType).filter(Boolean))];
+        return types.sort();
+    };
+
+    // Get unique engagement types
+    const getUniqueEngagementTypes = () => {
+        const types = [...new Set(submissions.map(sub => sub.engagementType).filter(Boolean))];
+        return types.sort();
+    };
+
 
     return (
         <div className="max-w-7xl mx-auto p-6 bg-white">
@@ -128,23 +155,26 @@ const SubmittedForms = () => {
                     )}
                 </form>
 
-                {/* Type Filter */}
+                {/* Filters */}
                 <div className="flex gap-4 items-center flex-wrap">
-                    <select
-                        value={typeFilter}
-                        onChange={(e) => setTypeFilter(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#00bba7] transition-colors text-gray-900"
-                    >
-                        <option value="">All Form Types</option>
-                        {getUniqueFormTypes().map(type => (
-                            <option key={type} value={type}>{type}</option>
-                        ))}
-                    </select>
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Form Type:</label>
+                        <select
+                            value={typeFilter}
+                            onChange={(e) => setTypeFilter(e.target.value)}
+                            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#00bba7] transition-colors text-gray-900 bg-white"
+                        >
+                            <option value="">All Form Types</option>
+                            {getUniqueFormTypes().map(type => (
+                                <option key={type} value={type}>{type}</option>
+                            ))}
+                        </select>
+                    </div>
                     {typeFilter && (
                         <button
                             type="button"
                             onClick={clearTypeFilter}
-                            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors text-sm text-gray-900"
+                            className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-lg transition-colors text-sm"
                         >
                             Clear Filter
                         </button>
@@ -177,8 +207,31 @@ const SubmittedForms = () => {
 
             {/* Results Summary */}
             {pagination && !isLoading && (
-                <div className="mb-4 text-sm text-gray-600">
-                    Showing {submissions.length} of {pagination.total} submissions
+                <div className="mb-4 flex items-center justify-between flex-wrap gap-4">
+                    <div className="text-sm text-gray-600">
+                        Showing <span className="font-semibold text-gray-900">{submissions.length}</span> of <span className="font-semibold text-gray-900">{pagination.total}</span> submissions
+                    </div>
+                    {submissions.length > 0 && (
+                        <div className="flex gap-4 text-xs text-gray-500">
+                            <span>
+                                Service Requests: <span className="font-semibold text-gray-700">
+                                    {submissions.filter(s => s.formType === 'Request a Service').length}
+                                </span>
+                            </span>
+                            <span>
+                                Questions: <span className="font-semibold text-gray-700">
+                                    {submissions.filter(s => s.formType === 'Ask a Question').length}
+                                </span>
+                            </span>
+                            {submissions.filter(s => s.engagementType).length > 0 && (
+                                <span>
+                                    With Engagement Type: <span className="font-semibold text-gray-700">
+                                        {submissions.filter(s => s.engagementType).length}
+                                    </span>
+                                </span>
+                            )}
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -186,14 +239,16 @@ const SubmittedForms = () => {
             {!isLoading && submissions.length > 0 && (
                 <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-8">
                     <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-gray-50 border-b border-gray-200">
+                        <table className="w-full min-w-[1200px]">
+                            <thead className="border-b border-gray-300">
                                 <tr>
-                                    <th className="text-left py-3 px-4 font-medium text-gray-700">Name</th>
-                                    <th className="text-left py-3 px-4 font-medium text-gray-700">Email</th>
-                                    <th className="text-left py-3 px-4 font-medium text-gray-700">Form Type</th>
-                                    <th className="text-left py-3 px-4 font-medium text-gray-700">Description</th>
-                                    <th className="text-left py-3 px-4 font-medium text-gray-700">Submitted</th>
+                                    <th className="text-left py-4 px-4 font-medium text-gray-900 text-sm">Name</th>
+                                    <th className="text-left py-4 px-4 font-medium text-gray-900 text-sm">Email</th>
+                                    <th className="text-left py-4 px-4 font-medium text-gray-900 text-sm min-w-[160px]">Form Type</th>
+                                    <th className="text-left py-4 px-4 font-medium text-gray-900 text-sm min-w-[180px]">Service Type</th>
+                                    <th className="text-left py-4 px-4 font-medium text-gray-900 text-sm">Engagement Type</th>
+                                    <th className="text-left py-4 px-4 font-medium text-gray-900 text-sm">Description</th>
+                                    <th className="text-left py-4 px-4 font-medium text-gray-900 text-sm">Submitted</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
@@ -205,18 +260,57 @@ const SubmittedForms = () => {
                                             </div>
                                         </td>
                                         <td className="py-4 px-4">
-                                            <div className="text-gray-600">
+                                            <a 
+                                                href={`mailto:${submission.email}`}
+                                                className="text-gray-600 hover:text-[#00bba7] transition-colors"
+                                            >
                                                 {submission.email || 'N/A'}
-                                            </div>
+                                            </a>
                                         </td>
-                                        <td className="py-4 px-4">
-                                            <span className="inline-flex px-2 py-1 text-xs font-medium bg-[#00bba7] bg-opacity-10 text-[#00bba7] rounded-full">
+                                        <td className="py-4 px-4 min-w-[160px]">
+                                            <span className="text-sm text-gray-700 font-medium whitespace-nowrap">
                                                 {submission.formType || 'General'}
                                             </span>
                                         </td>
+                                        <td className="py-4 px-4 min-w-[180px]">
+                                            {submission.serviceType ? (
+                                                <span className="text-sm text-gray-700 whitespace-nowrap">
+                                                    {submission.serviceType}
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-400 text-sm">—</span>
+                                            )}
+                                        </td>
                                         <td className="py-4 px-4">
-                                            <div className="text-gray-600 max-w-xs truncate" title={submission.description}>
-                                                {submission.description || 'No description'}
+                                            {submission.engagementType ? (
+                                                <span className="text-sm text-gray-700">
+                                                    {submission.engagementType}
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-400 text-sm">—</span>
+                                            )}
+                                        </td>
+                                        <td className="py-4 px-4">
+                                            <div className="max-w-xs">
+                                                {submission.description ? (
+                                                    <div>
+                                                        <div 
+                                                            className={`text-gray-600 text-sm ${expandedDescriptions.has(submission._id) ? '' : 'truncate'}`}
+                                                        >
+                                                            {submission.description}
+                                                        </div>
+                                                        {submission.description.length > 50 && (
+                                                            <button
+                                                                onClick={() => toggleDescription(submission._id)}
+                                                                className="text-xs text-[#00bba7] hover:underline mt-1"
+                                                            >
+                                                                {expandedDescriptions.has(submission._id) ? 'Show less' : 'Show more'}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-gray-400 text-sm">—</span>
+                                                )}
                                             </div>
                                         </td>
                                         <td className="py-4 px-4">

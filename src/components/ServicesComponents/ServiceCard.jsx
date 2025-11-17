@@ -33,34 +33,34 @@ const ServiceCard = ({ service }) => {
     };
 
     return (
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
             <div className="h-48 bg-gray-100 flex items-center justify-center">
-                {service.imageUrl ? (
+                {service.imageUrl || service.heroImage ? (
                     <img
-                        src={service.imageUrl}
+                        src={service.imageUrl || service.heroImage}
                         alt={service.title}
                         className="w-full h-full object-cover"
                     />
                 ) : (
-                    <div className="text-gray-500">No Image</div>
+                    <div className="text-gray-400 text-sm">No Image</div>
                 )}
             </div>
 
             <div className="p-5">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-1">{service.title}</h3>
+                <h3 className="text-lg font-semibold text-gray-900 line-clamp-1 mb-2">{service.title}</h3>
                 <p className="text-gray-600 text-sm leading-relaxed mb-5 line-clamp-3">
                     {service.description}
                 </p>
 
                 <div className="flex gap-3">
                     <button
-                        className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm transition-colors"
+                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition-colors"
                         onClick={handleEdit}
                     >
                         Edit
                     </button>
                     <button
-                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm transition-colors disabled:opacity-50"
+                        className="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition-colors disabled:opacity-50"
                         onClick={confirmDelete}
                         disabled={isDeleting}
                     >

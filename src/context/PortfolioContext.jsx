@@ -1,7 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useReducer } from 'react';
-import { listPortfolios, createPortfolio, updatePortfolio, deletePortfolio } from '../api/PortfolioApi';
+import React, { createContext, useContext, useReducer, useCallback } from 'react';
+import { listPortfolios, createPortfolio, updatePortfolio, deletePortfolio, getPortfolioById } from '../api/PortfolioApi';
 
 const initialState = {
     items: [],
@@ -53,11 +53,25 @@ export const PortfolioProvider = ({ children }) => {
         try {
             const { page = 1, limit = 10, search = state.searchQuery } = params;
             const res = await listPortfolios({ page, limit, search });
-            dispatch({ type: 'SET_LIST', payload: { items: res.data?.items || res.items || [], pagination: res.data?.pagination || res.pagination || null } });
+            // Handle ApiResponse structure: { statusCode, data: { items, pagination }, message, success }
+            const items = res.data?.items || res.items || [];
+            const pagination = res.data?.pagination || res.pagination || null;
+            dispatch({ type: 'SET_LIST', payload: { items, pagination } });
         } catch (error) {
-            dispatch({ type: 'SET_ERROR', payload: error.message || 'Failed to fetch portfolios' });
+            const errorMessage = error.message || error.data?.message || 'Failed to fetch portfolios';
+            dispatch({ type: 'SET_ERROR', payload: errorMessage });
         }
     };
+
+    const fetchPortfolioById = useCallback(async (id) => {
+        dispatch({ type: 'SET_LOADING', payload: true });
+        try {
+            const res = await getPortfolioById(id);
+            dispatch({ type: 'SET_CURRENT', payload: res.data || res });
+        } catch (error) {
+            dispatch({ type: 'SET_ERROR', payload: error.message || 'Failed to fetch portfolio' });
+        }
+    }, []);
 
     const createPortfolioHandler = async (data) => {
         dispatch({ type: 'SET_LOADING', payload: true });
@@ -99,6 +113,7 @@ export const PortfolioProvider = ({ children }) => {
         <PortfolioContext.Provider value={{
             state,
             fetchPortfolios,
+            fetchPortfolioById,
             createPortfolio: createPortfolioHandler,
             updatePortfolio: updatePortfolioHandler,
             deletePortfolio: deletePortfolioHandler,

@@ -11,10 +11,8 @@ const TestimonialFormPage = () => {
     const [formData, setFormData] = useState({
         content: '',
         name: '',
-        title: '',
-        testimonialImg: null
+        category: ''
     });
-    const [imagePreview, setImagePreview] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const isEditing = !!id;
@@ -30,10 +28,8 @@ const TestimonialFormPage = () => {
             setFormData({
                 content: state.currentTestimonial.content || '',
                 name: state.currentTestimonial.name || '',
-                title: state.currentTestimonial.title || '',
-                testimonialImg: null
+                category: state.currentTestimonial.category || ''
             });
-            setImagePreview(state.currentTestimonial.testimonialImg || '');
         }
     }, [state.currentTestimonial, isEditing]);
 
@@ -45,22 +41,6 @@ const TestimonialFormPage = () => {
         }));
     };
 
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setFormData(prev => ({
-                ...prev,
-                testimonialImg: file
-            }));
-
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -69,12 +49,8 @@ const TestimonialFormPage = () => {
             const submitData = {
                 content: formData.content,
                 name: formData.name,
-                title: formData.title
+                category: formData.category
             };
-
-            if (formData.testimonialImg) {
-                submitData.testimonialImg = formData.testimonialImg;
-            }
 
             if (isEditing) {
                 await updateTestimonial(id, submitData);
@@ -139,19 +115,21 @@ const TestimonialFormPage = () => {
                 </div>
 
                 <div>
-                    <label className="block text-gray-700 font-medium mb-2" htmlFor="title">
-                        Customer Title/Position <span className="text-red-500">*</span>
+                    <label className="block text-gray-700 font-medium mb-2" htmlFor="category">
+                        Category <span className="text-gray-500 text-sm">(Optional)</span>
                     </label>
                     <input
                         type="text"
-                        id="title"
-                        name="title"
-                        value={formData.title}
+                        id="category"
+                        name="category"
+                        value={formData.category}
                         onChange={handleInputChange}
-                        required
-                        placeholder="e.g., CEO at Company Name"
+                        placeholder="e.g., Software Engineering SaaS, Web Development, Mobile App"
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#00bba7] transition-colors text-gray-900"
                     />
+                    <p className="text-sm text-gray-500 mt-1">
+                        Enter the category or industry type (e.g., "Software Engineering SaaS")
+                    </p>
                 </div>
 
                 <div>
@@ -168,35 +146,6 @@ const TestimonialFormPage = () => {
                         placeholder="Enter the testimonial content"
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#00bba7] transition-colors resize-none text-gray-900"
                     />
-                </div>
-
-                <div>
-                    <label className="block text-gray-700 font-medium mb-2" htmlFor="testimonialImg">
-                        Customer Photo {!isEditing && <span className="text-red-500">*</span>}
-                    </label>
-                    <input
-                        type="file"
-                        id="testimonialImg"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        required={false}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#00bba7] transition-colors text-gray-900 appearance-none"
-                    />
-                    {imagePreview && (
-                        <div className="mt-4">
-                            <p className="text-sm text-gray-600 mb-2">Preview:</p>
-                            <img
-                                src={imagePreview}
-                                alt="Preview"
-                                className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                            />
-                        </div>
-                    )}
-                    {!isEditing && (
-                        <p className="text-sm text-gray-500 mt-1">
-                            Upload a photo of the customer
-                        </p>
-                    )}
                 </div>
 
                 <div className="flex gap-4 pt-6">

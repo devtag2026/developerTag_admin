@@ -24,8 +24,21 @@ export const createService = async (serviceData) => {
     try {
         const formData = new FormData();
         formData.append('title', serviceData.title);
+        formData.append('slug', serviceData.slug);
         formData.append('description', serviceData.description);
-        formData.append('image', serviceData.image);
+        formData.append('category', serviceData.category);
+        
+        if (serviceData.heroImage) {
+            if (serviceData.heroImage instanceof File) {
+                formData.append('heroImage', serviceData.heroImage);
+            } else {
+                formData.append('heroImage', serviceData.heroImage);
+            }
+        }
+        
+        if (serviceData.whyChooseSection) {
+            formData.append('whyChooseSection', JSON.stringify(serviceData.whyChooseSection));
+        }
 
         const response = await API.post("/services", formData, {
             headers: { "Content-Type": "multipart/form-data" },
@@ -44,16 +57,21 @@ export const updateService = async (id, serviceData) => {
     try {
         const formData = new FormData();
 
-        if (serviceData.title) {
-            formData.append('title', serviceData.title);
+        if (serviceData.title) formData.append('title', serviceData.title);
+        if (serviceData.slug) formData.append('slug', serviceData.slug);
+        if (serviceData.description) formData.append('description', serviceData.description);
+        if (serviceData.category) formData.append('category', serviceData.category);
+        
+        if (serviceData.heroImage) {
+            if (serviceData.heroImage instanceof File) {
+                formData.append('heroImage', serviceData.heroImage);
+            } else {
+                formData.append('heroImage', serviceData.heroImage);
+            }
         }
-
-        if (serviceData.description) {
-            formData.append('description', serviceData.description);
-        }
-
-        if (serviceData.image) {
-            formData.append('image', serviceData.image);
+        
+        if (serviceData.whyChooseSection) {
+            formData.append('whyChooseSection', JSON.stringify(serviceData.whyChooseSection));
         }
 
         const response = await API.patch(`/services/${id}`, formData, {
@@ -84,7 +102,7 @@ export const deleteService = async (id) => {
 
 export const getServiceById = async (id) => {
     try {
-        const response = await API.patch(`/services/${id}`);
+        const response = await API.get(`/services/${id}`);
         return response.data;
     } catch (error) {
         console.error(

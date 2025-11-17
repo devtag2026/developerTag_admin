@@ -56,12 +56,12 @@ const TestimonialDashboard = () => {
             </div>
 
             {/* Search Bar */}
-            <div className="mb-6">
-                <form onSubmit={handleSearch} className="flex gap-4 items-center">
-                    <div className="flex-1 max-w-md">
+            <div className="mb-6 space-y-4">
+                <form onSubmit={handleSearch} className="flex gap-4 items-center flex-wrap">
+                    <div className="flex-1 min-w-[300px]">
                         <input
                             type="text"
-                            placeholder="Search testimonials..."
+                            placeholder="Search by name, category, or content..."
                             value={searchInput}
                             onChange={(e) => setSearchInput(e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#00bba7] transition-colors text-gray-900"
@@ -69,7 +69,7 @@ const TestimonialDashboard = () => {
                     </div>
                     <button
                         type="submit"
-                        className="bg-[#00bba7] hover:bg-[#009689] text-white px-6 py-2 rounded-lg transition-colors text-gray-900"
+                        className="bg-[#00bba7] hover:bg-[#009689] text-white px-6 py-2 rounded-lg transition-colors"
                     >
                         Search
                     </button>
@@ -77,16 +77,19 @@ const TestimonialDashboard = () => {
                         <button
                             type="button"
                             onClick={clearSearch}
-                            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors text-gray-900"
+                            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
                         >
-                            Clear
+                            Clear Search
                         </button>
                     )}
                 </form>
+
+                {/* Active filters display */}
                 {state.searchQuery && (
-                    <p className="text-sm text-gray-600 mt-2">
-                        Showing results for: <span className="font-medium">"{state.searchQuery}"</span>
-                    </p>
+                    <div className="text-sm text-gray-600">
+                        Active filters:
+                        {state.searchQuery && <span className="ml-2 font-medium">Search: "{state.searchQuery}"</span>}
+                    </div>
                 )}
             </div>
 
@@ -97,9 +100,11 @@ const TestimonialDashboard = () => {
             )}
 
             {/* Results Summary */}
-            {state.pagination && (
-                <div className="mb-4 text-sm text-gray-600">
-                    Showing {state.testimonials.length} of {state.pagination.total} testimonials
+            {state.pagination && !state.isLoading && (
+                <div className="mb-4 flex items-center justify-between flex-wrap gap-4">
+                    <div className="text-sm text-gray-600">
+                        Showing <span className="font-semibold text-gray-900">{state.testimonials.length}</span> of <span className="font-semibold text-gray-900">{state.pagination.total}</span> testimonials
+                    </div>
                 </div>
             )}
 
