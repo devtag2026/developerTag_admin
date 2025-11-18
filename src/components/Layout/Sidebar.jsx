@@ -9,6 +9,7 @@ import {
     FileText,
     CheckSquare,
     Clock,
+    Briefcase,
     X
 } from "lucide-react";
 import { useSidebar } from '../../context/SidebarContext';
@@ -19,7 +20,8 @@ export const navItems = [
     { path: "/admin/submitted-forms", label: "Submitted Forms", icon: ClipboardList },
     { path: "/admin/services", label: "Services", icon: BookOpen },
     { path: "/admin/testimonial", label: "Testimonials", icon: FileText },
-    { path: "/admin/portfolio", label: "Portfolio", icon: CalendarDays }
+    { path: "/admin/portfolio", label: "Portfolio", icon: CalendarDays },
+    { path: "/admin/careers", label: "Careers", icon: Briefcase }
 ];
 
 const Sidebar = () => {

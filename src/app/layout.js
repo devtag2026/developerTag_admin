@@ -5,6 +5,7 @@ import { AuthProvider } from "../context/AuthContext";
 import { ServiceProvider } from "../context/ServiceContext";
 import { TestimonialProvider } from "../context/TestimonialContext";
 import { PortfolioProvider } from "../context/PortfolioContext";
+import { CareerProvider } from "../context/CareerContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,7 +36,9 @@ export default function RootLayout({ children }) {
             <ServiceProvider>
               <TestimonialProvider>
                 <PortfolioProvider>
-                  {children}
+                  <CareerProvider>
+                    {children}
+                  </CareerProvider>
                 </PortfolioProvider>
               </TestimonialProvider>
             </ServiceProvider>
