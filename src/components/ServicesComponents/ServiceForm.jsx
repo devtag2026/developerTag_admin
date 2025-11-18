@@ -14,7 +14,6 @@ const ServiceFormPage = () => {
         description: '',
         category: '',
         heroImage: null,
-        heroImageUrl: '',
         whyChooseSection: {
             title: 'Why Choose Us',
             items: [{ title: '', content: '' }]
@@ -53,7 +52,6 @@ const ServiceFormPage = () => {
                 description: service.description || '',
                 category: service.category || '',
                 heroImage: null,
-                heroImageUrl: service.heroImage || '',
                 whyChooseSection: service.whyChooseSection || {
                     title: 'Why Choose Us',
                     items: [{ title: '', content: '' }]
@@ -148,14 +146,6 @@ const ServiceFormPage = () => {
         }
     };
 
-    const handleImageUrlChange = (e) => {
-        setFormData(prev => ({
-            ...prev,
-            heroImageUrl: e.target.value
-        }));
-        setImagePreview(e.target.value);
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -172,10 +162,16 @@ const ServiceFormPage = () => {
                 }
             };
 
-            if (formData.heroImage) {
+            // Only send image if a new file is uploaded
+            if (formData.heroImage && formData.heroImage instanceof File) {
                 submitData.heroImage = formData.heroImage;
-            } else if (formData.heroImageUrl) {
-                submitData.heroImage = formData.heroImageUrl;
+            }
+
+            // Validate that image is provided for new services
+            if (!isEditing && !submitData.heroImage) {
+                alert('Please provide an image file');
+                setIsSubmitting(false);
+                return;
             }
 
             if (isEditing) {
@@ -325,34 +321,27 @@ const ServiceFormPage = () => {
                     <label className="block text-gray-700 font-medium mb-2" htmlFor="heroImage">
                         Hero Image {!isEditing && <span className="text-red-500">*</span>}
                     </label>
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         <input
                             type="file"
                             id="heroImage"
                             accept="image/*"
                             onChange={handleImageChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#00bba7] transition-colors text-gray-900 appearance-none"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00bba7] focus:border-transparent transition-all text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#00bba7] file:text-white hover:file:bg-[#009689] cursor-pointer"
                         />
-                        <div className="text-sm text-gray-500 text-center">OR</div>
-                        <input
-                            type="url"
-                            id="heroImageUrl"
-                            value={formData.heroImageUrl}
-                            onChange={handleImageUrlChange}
-                            placeholder="Enter image URL"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#00bba7] transition-colors text-gray-900"
-                        />
+                        {imagePreview && (
+                            <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <p className="text-sm font-medium text-gray-700 mb-3">Image Preview:</p>
+                                <div className="relative">
+                                    <img
+                                        src={imagePreview}
+                                        alt="Preview"
+                                        className="w-full max-w-md h-64 object-contain rounded-lg border border-gray-300 bg-white"
+                                    />
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    {imagePreview && (
-                        <div className="mt-4">
-                            <p className="text-sm text-gray-600 mb-2">Preview:</p>
-                            <img
-                                src={imagePreview}
-                                alt="Preview"
-                                className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-300"
-                            />
-                        </div>
-                    )}
                 </div>
 
                 {/* Why Choose Section */}

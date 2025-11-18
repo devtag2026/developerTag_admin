@@ -28,12 +28,9 @@ export const createService = async (serviceData) => {
         formData.append('description', serviceData.description);
         formData.append('category', serviceData.category);
         
-        if (serviceData.heroImage) {
-            if (serviceData.heroImage instanceof File) {
-                formData.append('heroImage', serviceData.heroImage);
-            } else {
-                formData.append('heroImage', serviceData.heroImage);
-            }
+        // Handle image - only file uploads
+        if (serviceData.heroImage && serviceData.heroImage instanceof File) {
+            formData.append('heroImage', serviceData.heroImage);
         }
         
         if (serviceData.whyChooseSection) {
@@ -62,12 +59,9 @@ export const updateService = async (id, serviceData) => {
         if (serviceData.description) formData.append('description', serviceData.description);
         if (serviceData.category) formData.append('category', serviceData.category);
         
-        if (serviceData.heroImage) {
-            if (serviceData.heroImage instanceof File) {
-                formData.append('heroImage', serviceData.heroImage);
-            } else {
-                formData.append('heroImage', serviceData.heroImage);
-            }
+        // Handle image - only file uploads
+        if (serviceData.heroImage && serviceData.heroImage instanceof File) {
+            formData.append('heroImage', serviceData.heroImage);
         }
         
         if (serviceData.whyChooseSection) {
