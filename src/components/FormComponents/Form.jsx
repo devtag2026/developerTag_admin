@@ -106,18 +106,11 @@ const SubmittedForms = () => {
         return types.sort();
     };
 
-    // Get unique service types
-    const getUniqueServiceTypes = () => {
-        const types = [...new Set(submissions.map(sub => sub.serviceType).filter(Boolean))];
-        return types.sort();
+    // Placeholder handler for the contract/milestones action
+    const handleReviewContract = (submission) => {
+        // Wire this up to a modal or route once the contract flow is ready
+        console.log('Create Project Proposal for:', submission._id);
     };
-
-    // Get unique engagement types
-    const getUniqueEngagementTypes = () => {
-        const types = [...new Set(submissions.map(sub => sub.engagementType).filter(Boolean))];
-        return types.sort();
-    };
-
 
     return (
         <div className="max-w-7xl mx-auto p-6 bg-white">
@@ -140,7 +133,7 @@ const SubmittedForms = () => {
                     </div>
                     <button
                         type="submit"
-                        className="bg-[#00bba7] hover:bg-[#009689] text-white px-6 py-2 rounded-lg transition-colors text-gray-900"
+                        className="bg-[#00bba7] hover:bg-[#009689] text-white px-6 py-2 rounded-lg transition-colors font-medium"
                     >
                         Search
                     </button>
@@ -148,7 +141,7 @@ const SubmittedForms = () => {
                         <button
                             type="button"
                             onClick={clearSearch}
-                            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors text-gray-900"
+                            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors font-medium"
                         >
                             Clear Search
                         </button>
@@ -223,10 +216,10 @@ const SubmittedForms = () => {
                                     {submissions.filter(s => s.formType === 'Ask a Question').length}
                                 </span>
                             </span>
-                            {submissions.filter(s => s.engagementType).length > 0 && (
+                            {submissions.filter(s => s.budget).length > 0 && (
                                 <span>
-                                    With Engagement Type: <span className="font-semibold text-gray-700">
-                                        {submissions.filter(s => s.engagementType).length}
+                                    With Budget: <span className="font-semibold text-gray-700">
+                                        {submissions.filter(s => s.budget).length}
                                     </span>
                                 </span>
                             )}
@@ -237,54 +230,65 @@ const SubmittedForms = () => {
 
             {/* Submissions Table */}
             {!isLoading && submissions.length > 0 && (
-                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-8">
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-8">
                     <div className="overflow-x-auto">
-                        <table className="w-full min-w-[1200px]">
-                            <thead className="border-b border-gray-300">
+                        <table className="w-full min-w-[1300px]">
+                            <thead className="bg-gray-50 border-b border-gray-200">
                                 <tr>
-                                    <th className="text-left py-4 px-4 font-medium text-gray-900 text-sm">Name</th>
-                                    <th className="text-left py-4 px-4 font-medium text-gray-900 text-sm">Email</th>
-                                    <th className="text-left py-4 px-4 font-medium text-gray-900 text-sm min-w-[160px]">Form Type</th>
-                                    <th className="text-left py-4 px-4 font-medium text-gray-900 text-sm min-w-[180px]">Service Type</th>
-                                    <th className="text-left py-4 px-4 font-medium text-gray-900 text-sm">Engagement Type</th>
-                                    <th className="text-left py-4 px-4 font-medium text-gray-900 text-sm">Description</th>
-                                    <th className="text-left py-4 px-4 font-medium text-gray-900 text-sm">Submitted</th>
+                                    <th className="text-left py-3.5 px-4 font-semibold text-gray-700 text-xs uppercase tracking-wide">Name</th>
+                                    <th className="text-left py-3.5 px-4 font-semibold text-gray-700 text-xs uppercase tracking-wide">Email</th>
+                                    <th className="text-left py-3.5 px-4 font-semibold text-gray-700 text-xs uppercase tracking-wide min-w-[140px]">Form Type</th>
+                                    <th className="text-left py-3.5 px-4 font-semibold text-gray-700 text-xs uppercase tracking-wide min-w-[160px]">Project Goal</th>
+                                    <th className="text-left py-3.5 px-4 font-semibold text-gray-700 text-xs uppercase tracking-wide min-w-[180px]">Expertise Needed</th>
+                                    <th className="text-left py-3.5 px-4 font-semibold text-gray-700 text-xs uppercase tracking-wide min-w-[110px]">Budget</th>
+                                    <th className="text-left py-3.5 px-4 font-semibold text-gray-700 text-xs uppercase tracking-wide">Description</th>
+                                    <th className="text-left py-3.5 px-4 font-semibold text-gray-700 text-xs uppercase tracking-wide">Submitted</th>
+                                    <th className="text-left py-3.5 px-4 font-semibold text-gray-700 text-xs uppercase tracking-wide min-w-[210px]">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200">
+                            <tbody className="divide-y divide-gray-100">
                                 {submissions.map((submission) => (
-                                    <tr key={submission._id} className="hover:bg-gray-50 transition-colors">
+                                    <tr key={submission._id} className="hover:bg-gray-50/80 transition-colors">
                                         <td className="py-4 px-4">
                                             <div className="font-medium text-gray-900">
                                                 {submission.name || 'N/A'}
                                             </div>
                                         </td>
                                         <td className="py-4 px-4">
-                                            <a 
+                                            <a
                                                 href={`mailto:${submission.email}`}
                                                 className="text-gray-600 hover:text-[#00bba7] transition-colors"
                                             >
                                                 {submission.email || 'N/A'}
                                             </a>
                                         </td>
-                                        <td className="py-4 px-4 min-w-[160px]">
-                                            <span className="text-sm text-gray-700 font-medium whitespace-nowrap">
+                                        <td className="py-4 px-4 min-w-[140px]">
+                                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 whitespace-nowrap">
                                                 {submission.formType || 'General'}
                                             </span>
                                         </td>
-                                        <td className="py-4 px-4 min-w-[180px]">
-                                            {submission.serviceType ? (
-                                                <span className="text-sm text-gray-700 whitespace-nowrap">
-                                                    {submission.serviceType}
+                                        <td className="py-4 px-4 min-w-[160px]">
+                                            {submission.projectGoal ? (
+                                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[#00bba7]/10 text-[#007b6e] whitespace-nowrap">
+                                                    {submission.projectGoal}
                                                 </span>
                                             ) : (
                                                 <span className="text-gray-400 text-sm">—</span>
                                             )}
                                         </td>
-                                        <td className="py-4 px-4">
-                                            {submission.engagementType ? (
+                                        <td className="py-4 px-4 min-w-[180px]">
+                                            {submission.expertiseNeeded ? (
                                                 <span className="text-sm text-gray-700">
-                                                    {submission.engagementType}
+                                                    {submission.expertiseNeeded}
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-400 text-sm">—</span>
+                                            )}
+                                        </td>
+                                        <td className="py-4 px-4 min-w-[110px]">
+                                            {submission.budget ? (
+                                                <span className="text-sm font-semibold text-gray-900 whitespace-nowrap">
+                                                    {submission.budget}
                                                 </span>
                                             ) : (
                                                 <span className="text-gray-400 text-sm">—</span>
@@ -294,7 +298,7 @@ const SubmittedForms = () => {
                                             <div className="max-w-xs">
                                                 {submission.description ? (
                                                     <div>
-                                                        <div 
+                                                        <div
                                                             className={`text-gray-600 text-sm ${expandedDescriptions.has(submission._id) ? '' : 'truncate'}`}
                                                         >
                                                             {submission.description}
@@ -314,9 +318,23 @@ const SubmittedForms = () => {
                                             </div>
                                         </td>
                                         <td className="py-4 px-4">
-                                            <div className="text-sm text-gray-500">
+                                            <div className="text-sm text-gray-500 whitespace-nowrap">
                                                 {formatDate(submission.createdAt)}
                                             </div>
+                                        </td>
+                                        <td className="py-4 px-4 min-w-[210px]">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleReviewContract(submission)}
+                                                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold text-white bg-[#00bba7] hover:bg-[#009689] transition-colors whitespace-nowrap"
+                                            >
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                    <path d="M9 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    <path d="M14 2v6h6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    <path d="M9 13h6M9 17h6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                </svg>
+                                                Create Project Proposal
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
