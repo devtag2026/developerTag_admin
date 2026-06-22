@@ -8,7 +8,6 @@ import {
     CalendarDays,
     FileText,
     CheckSquare,
-    Clock,
     Briefcase,
     X
 } from "lucide-react";
@@ -21,7 +20,8 @@ export const navItems = [
     { path: "/admin/services", label: "Services", icon: BookOpen },
     { path: "/admin/testimonial", label: "Testimonials", icon: FileText },
     { path: "/admin/portfolio", label: "Portfolio", icon: CalendarDays },
-    { path: "/admin/careers", label: "Careers", icon: Briefcase }
+    { path: "/admin/careers", label: "Careers", icon: Briefcase },
+    {path:"/admin/contracts", label: "Contracts", icon: CheckSquare }
 ];
 
 const Sidebar = () => {
