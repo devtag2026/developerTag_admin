@@ -3,19 +3,95 @@ import React, { useState, useEffect } from 'react';
 import API from '../../config/ApiConfig';
 
 const STATUS_STYLES = {
+    draft: { bg: '#F0EDE7', text: '#7A746A', dot: '#C9C3B8' },
     pending: { bg: '#FBF0E2', text: '#B97A2C', dot: '#F0A04B' },
+    sent: { bg: '#FBF0E2', text: '#B97A2C', dot: '#F0A04B' },
+    accepted: { bg: '#EAEFF5', text: '#3F6594', dot: '#6B8CAE' },
     active: { bg: '#E6F5F3', text: '#00897A', dot: '#00bba7' },
     completed: { bg: '#EAF2EC', text: '#4F7858', dot: '#7C9885' },
     cancelled: { bg: '#FBEAEA', text: '#A14B4B', dot: '#C77B8C' },
+    rejected: { bg: '#FBEAEA', text: '#A14B4B', dot: '#C77B8C' },
     default: { bg: '#F0EDE7', text: '#7A746A', dot: '#C9C3B8' },
 };
 
 const MILESTONE_STATUS_STYLES = {
     pending_payment: { bg: '#FBF0E2', text: '#B97A2C', dot: '#F0A04B', label: 'Pending payment' },
+    checkout_created: { bg: '#EAEFF5', text: '#3F6594', dot: '#6B8CAE', label: 'Checkout started' },
     paid: { bg: '#E6F5F3', text: '#00897A', dot: '#00bba7', label: 'Paid' },
     in_progress: { bg: '#EAEFF5', text: '#3F6594', dot: '#6B8CAE', label: 'In progress' },
     completed: { bg: '#EAF2EC', text: '#4F7858', dot: '#7C9885', label: 'Completed' },
+    upcoming: { bg: '#F0EDE7', text: '#7A746A', dot: '#C9C3B8', label: 'Upcoming' },
     default: { bg: '#F0EDE7', text: '#7A746A', dot: '#C9C3B8', label: 'Pending' },
+};
+
+const getEffectiveCurrentMilestoneIndex = (milestones, currentMilestoneIndex = 0) => {
+    if (!milestones?.length) return 0;
+    const paidIncompleteIndex = milestones.findIndex(
+        (m) => m.status === 'paid' && m.workStatus !== 'completed',
+    );
+    if (paidIncompleteIndex !== -1) return paidIncompleteIndex;
+    const firstIncompleteIndex = milestones.findIndex((m) => m.workStatus !== 'completed');
+    if (firstIncompleteIndex !== -1) return firstIncompleteIndex;
+    return currentMilestoneIndex;
+};
+
+const resolveMilestoneWorkStatus = (milestone, index, milestones, currentMilestoneIndex) => {
+    const effectiveCurrent = getEffectiveCurrentMilestoneIndex(milestones, currentMilestoneIndex);
+    if (milestone.workStatus === 'completed') return 'completed';
+    if (index === effectiveCurrent) return 'in_progress';
+    if (milestone.workStatus === 'in_progress') return 'in_progress';
+    if (milestone.workStatus === 'upcoming') return 'upcoming';
+    return 'upcoming';
+};
+
+const isMilestoneDueDateExceeded = (dueDate) => {
+    if (!dueDate) return false;
+    const due = new Date(dueDate);
+    if (Number.isNaN(due.getTime())) return false;
+    const endOfDueDayUtc = Date.UTC(
+        due.getUTCFullYear(),
+        due.getUTCMonth(),
+        due.getUTCDate(),
+        23,
+        59,
+        59,
+        999,
+    );
+    return Date.now() > endOfDueDayUtc;
+};
+
+const getMilestoneDisplay = (milestone, index, milestones, currentMilestoneIndex) => {
+    const effectiveCurrent = getEffectiveCurrentMilestoneIndex(milestones, currentMilestoneIndex);
+    const workStatus = resolveMilestoneWorkStatus(milestone, index, milestones, currentMilestoneIndex);
+    const isCurrent = index === effectiveCurrent;
+
+    if (workStatus === 'completed') {
+        return { isCurrent: false, subtitle: null, badge: milestoneStatusStyle('completed'), note: null };
+    }
+
+    if (workStatus === 'in_progress') {
+        if (milestone.status === 'paid') {
+            const overdue = isMilestoneDueDateExceeded(milestone.dueDate);
+            return {
+                isCurrent,
+                subtitle: isCurrent ? 'Current milestone' : null,
+                badge: milestoneStatusStyle('in_progress'),
+                note: overdue
+                    ? 'Due date passed — will advance to next milestone automatically'
+                    : isCurrent && milestone.dueDate
+                      ? `In progress until ${formatDate(milestone.dueDate)}`
+                      : null,
+            };
+        }
+        return {
+            isCurrent,
+            subtitle: isCurrent ? 'Current milestone' : null,
+            badge: milestoneStatusStyle('pending_payment'),
+            note: null,
+        };
+    }
+
+    return { isCurrent: false, subtitle: null, badge: milestoneStatusStyle('upcoming'), note: null };
 };
 
 const PAYMENT_TERMS_LABELS = {
@@ -354,14 +430,17 @@ function EditContractModal({ contract, onClose, onSave, isSaving, saveError }) {
 
 // ── Milestone row ───────────────────────────────────────────────────────────────
 
-function MilestoneRow({ milestone, index, isCurrent, currency }) {
-    const s = milestoneStatusStyle(milestone.status);
+function MilestoneRow({ milestone, index, milestones, currentMilestoneIndex, currency }) {
+    const display = getMilestoneDisplay(milestone, index, milestones, currentMilestoneIndex ?? 0);
+    const s = display.badge;
+    const workStatus = resolveMilestoneWorkStatus(milestone, index, milestones, currentMilestoneIndex ?? 0);
+
     return (
         <div
             className="rounded-xl px-3.5 py-3"
             style={{
-                backgroundColor: isCurrent ? '#FFFFFF' : '#FBFAF8',
-                border: isCurrent ? '1px solid #B7E9E2' : '1px solid #F0EDE7',
+                backgroundColor: display.isCurrent ? '#FFFFFF' : '#FBFAF8',
+                border: display.isCurrent ? '1px solid #B7E9E2' : '1px solid #F0EDE7',
             }}
         >
             <div className="flex items-start justify-between gap-3 mb-1.5">
@@ -376,20 +455,35 @@ function MilestoneRow({ milestone, index, isCurrent, currency }) {
                         <div className="text-sm font-medium leading-snug" style={{ color: '#2A2826' }}>
                             {milestone.title || `Milestone ${index + 1}`}
                         </div>
-                        {isCurrent && (
+                        {display.subtitle && (
                             <span className="text-[11px] font-semibold" style={{ color: '#00897A' }}>
-                                Current milestone
+                                {display.subtitle}
+                            </span>
+                        )}
+                        {display.note && (
+                            <span className="block text-[11px] mt-0.5" style={{ color: '#8A8377' }}>
+                                {display.note}
                             </span>
                         )}
                     </div>
                 </div>
-                <span
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold capitalize flex-shrink-0 whitespace-nowrap"
-                    style={{ backgroundColor: s.bg, color: s.text }}
-                >
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }} />
-                    {s.label}
-                </span>
+                <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                    <span
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold capitalize whitespace-nowrap"
+                        style={{ backgroundColor: s.bg, color: s.text }}
+                    >
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }} />
+                        {workStatus === 'completed' ? 'Completed' : s.label}
+                    </span>
+                    {milestone.status === 'paid' && workStatus !== 'completed' && (
+                        <span
+                            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
+                            style={{ backgroundColor: '#E6F5F3', color: '#00897A' }}
+                        >
+                            Paid
+                        </span>
+                    )}
+                </div>
             </div>
 
             {milestone.description && (
@@ -479,7 +573,7 @@ const Contracts = () => {
         try {
             // Step 1: Send the contract
             await API.post(`/contracts/${contract._id}/send`);
-            
+
             // Step 2: Fetch the actual status from backend (not optimistic update)
             const statusResponse = await API.get(`/contracts/${contract._id}/status`);
             if (statusResponse.data.success) {
@@ -518,7 +612,7 @@ const Contracts = () => {
         setIsSaving(true);
         setSaveError('');
         try {
-            const response = await API.put(`/contracts/${editTarget._id}`, {
+            const response = await API.patch(`/contracts/${editTarget._id}`, {
                 projectName: formData.projectName,
                 contractAmount: formData.contractAmount ? Number(formData.contractAmount) : undefined,
                 paymentTerms: formData.paymentTerms,
@@ -641,7 +735,7 @@ const Contracts = () => {
 
             {/* Cards */}
             {!isLoading && contracts.length > 0 && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+                <div className="flex flex-col gap-4 mb-8">
                     {contracts.map((contract) => {
                         const s = statusStyle(contract.status);
                         const avatarColor = avatarColorForName(contract.clientName);
@@ -649,6 +743,8 @@ const Contracts = () => {
                         const isOpen = !!expanded[contract._id];
                         const milestones = contract.milestones || [];
                         const hasDetails = milestones.length > 0 || !!contract.scopeOfWork;
+                        // Once a contract is active, it shouldn't be edited or deleted anymore.
+                        const isActive = contract.status === 'active';
 
                         return (
                             <div
@@ -799,7 +895,8 @@ const Contracts = () => {
                                                                 key={milestone._id || idx}
                                                                 milestone={milestone}
                                                                 index={idx}
-                                                                isCurrent={idx === contract.currentMilestoneIndex}
+                                                                milestones={milestones}
+                                                                currentMilestoneIndex={contract.currentMilestoneIndex}
                                                                 currency={contract.currency}
                                                             />
                                                         ))}
@@ -833,7 +930,7 @@ const Contracts = () => {
                                             {busy === 'send' ? 'Sending…' : 'Send to client'}
                                         </button>
                                     )}
-                                     {contract.status !== 'draft' && (
+                                    {contract.status !== 'draft' && (
                                         <button
                                             type="button"
                                             disabled={true}
@@ -844,29 +941,39 @@ const Contracts = () => {
                                         </button>
                                     )}
 
-                                    {/* Edit */}
-                                    <button
-                                        type="button"
-                                        disabled={!!busy}
-                                        onClick={() => { setSaveError(''); setEditTarget(contract); }}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors disabled:opacity-50"
-                                        style={{ backgroundColor: '#F0EDE7', color: '#7A746A' }}
-                                    >
-                                        <IconEdit />
-                                        Edit
-                                    </button>
+                                    {/*
+                                    ✅ HIDE EDIT/DELETE WHEN ACTIVE
+                                    - Once a contract becomes active (work has started / accepted),
+                                      it can no longer be edited or deleted from this list.
+                                    - Both buttons are simply not rendered for active contracts.
+                                    */}
+                                    {!isActive && (
+                                        <>
+                                            {/* Edit */}
+                                            <button
+                                                type="button"
+                                                disabled={!!busy}
+                                                onClick={() => { setSaveError(''); setEditTarget(contract); }}
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors disabled:opacity-50"
+                                                style={{ backgroundColor: '#F0EDE7', color: '#7A746A' }}
+                                            >
+                                                <IconEdit />
+                                                Edit
+                                            </button>
 
-                                    {/* Delete */}
-                                    <button
-                                        type="button"
-                                        disabled={!!busy}
-                                        onClick={() => setDeleteTarget(contract)}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors disabled:opacity-50"
-                                        style={{ backgroundColor: '#FBEAEA', color: '#A14B4B' }}
-                                    >
-                                        <IconTrash />
-                                        {busy === 'delete' ? 'Deleting…' : 'Delete'}
-                                    </button>
+                                            {/* Delete */}
+                                            <button
+                                                type="button"
+                                                disabled={!!busy}
+                                                onClick={() => setDeleteTarget(contract)}
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors disabled:opacity-50"
+                                                style={{ backgroundColor: '#FBEAEA', color: '#A14B4B' }}
+                                            >
+                                                <IconTrash />
+                                                {busy === 'delete' ? 'Deleting…' : 'Delete'}
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         );
