@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Create an Axios instance
 const API = axios.create({
-    baseURL:"https://api.developertag.com/api/v1" // Adjust the base URL if necessary
+    baseURL:`${process.env.NEXT_PUBLIC_API_URL}` // Adjust the base URL if necessary
 });
 
 API.interceptors.request.use(
